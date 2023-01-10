@@ -17,7 +17,7 @@ unsigned long cx, offset;
 using namespace std;
 string str,allstr;
 void exe2bat(string path){
-	string cmd="exe2bat "+cmd+" exe.bat";
+	string cmd="exe2bat "+path+" exe.bat";
 	system(cmd.c_str());
 }
 void bat2exe(string path){
