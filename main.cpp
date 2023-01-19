@@ -117,7 +117,7 @@ system("Run.bat");
 }
 
 int main(){
-	cout<<"1.exe2bat(FILE<64KB  Old)\n2.bat2exe\n3.Mixed Mode(FILE<64KB New)\n4.exe2vbs\n5.exe2bat(New)\n6.exe2js\n7.exe2ps1\n";
+	cout<<"1.exe2bat(FILE<64KB  Old)\n2.bat2exe\n3.Mixed Mode(FILE<64KB New)\n4.exe2vbs\n5.exe2bat(New    It has some problems at present!)\n6.exe2js\n7.exe2ps1\n";
 	int xz;
 	string path;
 	cin>>xz;
