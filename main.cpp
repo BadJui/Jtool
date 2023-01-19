@@ -24,6 +24,23 @@ static const std::string base64_chars =
 static inline bool is_base64(unsigned char c) {
 	return (isalnum(c) || (c == '+') || (c == '/'));
 }
+string getCmdResult(string strCmd)  {
+    char buf[1024] = {0};
+    FILE *pf = NULL;
+    if((pf=popen(strCmd.c_str(),"r"))==NULL){
+        return "";
+    }
+    string strResult;
+    while(fgets(buf,sizeof buf,pf)){
+        strResult+=buf;
+    }
+    pclose(pf);
+    unsigned int iSize= strResult.size();
+    if(iSize>0&&strResult[iSize-1]=='\n'){  // linux
+        strResult = strResult.substr(0, iSize - 1);
+    }
+    return strResult;
+}
 std::string base64_encode(char const* bytes_to_encode, int in_len) {
 	std::string ret;
 	int i = 0;
@@ -69,7 +86,7 @@ void exe2bat(string path){
 	string cmd="exe2bat "+path+" exe.bat";
 	system(cmd.c_str());
 }
-void bat2exe(string path){
+void bat2exe(string path,string name){
 	ifstream ifile;
 	ifile.open(path);
 	while(getline(ifile,str)){
@@ -77,7 +94,7 @@ void bat2exe(string path){
 		allstr=allstr+"ofile<<"+"R"+abc+"("+str+")"+abc+"<<"+"endl;\n";
 	}
 	ofstream ofile;
-	ofile.open("bat.cpp");
+	ofile.open(name);
 	ofile<<R"(#include<windows.h>
 #include<fstream>
 using namespace std;
@@ -89,7 +106,30 @@ system("Run.bat");
 	return 0;
 	})";
 	ofile.close();
-	system("g++.exe bat.cpp -o bat.exe -std=c++11 -static-libgcc");
+	string cmd="g++.exe "+name+".cpp -o "+name+".exe -std=c++11 -static-libgcc";
+	system(cmd.c_str());
+}
+void newMixed(string path){
+	ifstream ifile;
+	ifile.open(path);
+	while(getline(ifile,str)){
+		char abc=34;
+		allstr=allstr+"ofile<<"+"R"+abc+"("+str+")"+abc+"<<"+"endl;\n";
+	}
+	ofstream ofile;
+	ofile.open("Mixed.cpp");
+	ofile<<R"(#include<windows.h>
+#include<fstream>
+using namespace std;
+int main(){
+ofstream ofile;
+ofile.open("Run.bat");)"<<endl;
+	ofile<<allstr<<R"(ofile.close();
+system("Run.bat");
+	return 0;
+	})";
+	ofile.close();
+	system("g++.exe Mixed.cpp -o Mixed.exe -std=c++11 -static-libgcc");
 }
 void Mixed(string path){
 	exe2bat(path);
@@ -115,9 +155,8 @@ system("Run.bat");
 	ofile.close();
 	system("g++.exe Mixed.cpp -o Mixed.exe -std=c++11 -static-libgcc");
 }
-
 int main(){
-	cout<<"1.exe2bat(FILE<64KB  Old)\n2.bat2exe\n3.Mixed Mode(FILE<64KB New)\n4.exe2vbs\n5.exe2bat(New    It has some problems at present!)\n6.exe2js\n7.exe2ps1\n";
+	cout<<"1.exe2bat(FILE<64KB  Old)\n2.bat2exe\n3.Mixed Mode(FILE<64KB New)\n4.exe2vbs\n5.exe2bat(New)\n6.exe2js\n7.exe2ps1\n8.Mixed Mode(New)\n";
 	int xz;
 	string path;
 	cin>>xz;
@@ -137,7 +176,7 @@ int main(){
 		cin>>path;
 		system("cls");
 		cout<<"Processing...";
-		bat2exe(path);
+		bat2exe(path,"bat");
 		system("cls");
 		cout<<R"(It has been output in the current directory, and the file name is "bat.exe".)"<<endl;
 		system("pause");
@@ -184,52 +223,23 @@ CreateObject("WScript.Shell").Run p+"\x.exe")";
 		system("pause");
 	}
 	if(xz==5){
-		string basestr;
 		cout<<"Enter Your Exe Path:";
 		cin>>path;
+		string cmd="certutil -encode "+path+" base.txt";
+		system(cmd.c_str());
 		system("cls");
 		cout<<"Processing...";
 		ifstream ifile;
-		ifile.open(path, ios_base::binary);
-		while(getline(ifile,str)){
-			allstr=allstr+str+"\n";
+		ifile.open("base.txt");
+		string base;
+		while(getline(ifile,base)){
+			allstr=allstr+"echo "+base+" >>%temp%/base.txt\n";
 		}
-		basestr=base64_encode(allstr.data(),allstr.size());
 		ifile.close();
 		ofstream ofile;
 		ofile.open("newexe.bat");
-		ofile<<R"(@Echo off
-echo Don't care about the displayed information! Please wait for a moment!
-del %tmp%\x
-)";
-		for(int i=0;i<basestr.size();i+=69){
-			ofile<<"echo "<<basestr.substr(i,70)<<R"(>>%tmp%\x)"<<endl;
-		}
-		ofile<<R"(findstr /e "'v" "%~f0">%tmp%\x.vbs
-cscript //nologo %tmp%\x.vbs
-del %tmp%\x
-del %tmp%\x.vbs
-start "" %tmp%\x.exe
-exit
-Set f=CreateObject("Scripting.FileSystemObject")'v
-Set p=f.GetSpecialFolder(2)'v
-Set i=f.OpenTextFile(p+"\x",1)'v
-c=i.ReadAll()'v
-i.Close'v
-Set x=CreateObject("Msxml2.DOMDocument")'v
-Set o=x.CreateElement("base64")'v
-o.dataType="bin.base64"'v
-o.text=c'v
-Set b=CreateObject("ADODB.Stream")'v
-b.Type=1'v
-b.Open'v
-b.Write o.NodeTypedValue'v
-b.SaveToFile p+"\x.exe",2'v
-)";
+		ofile<<"@Echo off"<<endl<<allstr<<"certutil -decode %temp%/base.txt %temp%/base.exe & start %temp%/base.exe";
 		ofile.close();
-		system("cls");
-		cout<<R"(It has been output in the current directory, and the file name is "newexe.bat".)"<<endl;
-		system("pause");
 	}
 	if(xz==6){
 		cout<<"Enter Your Exe Path:";
@@ -281,6 +291,54 @@ Start-Process $p)";
 		cout<<R"(It has been output in the current directory, and the file name is "exe.ps1".)"<<endl;
 		system("pause");
 	}
+	if(xz==8){
+				string basestr;
+		cout<<"Enter Your Exe Path:";
+		cin>>path;
+		system("cls");
+		cout<<"Processing...";
+		ifstream ifile;
+		ifile.open(path, ios_base::binary);
+		while(getline(ifile,str)){
+			allstr=allstr+str+"\n";
+		}
+		basestr=base64_encode(allstr.data(),allstr.size());
+		ifile.close();
+		ofstream ofile;
+		ofile.open("Mixed.bat");
+		ofile<<R"(@Echo off
+echo Don't care about the displayed information! Please wait for a moment!
+del %tmp%\x
+)";
+		for(int i=0;i<basestr.size();i+=69){
+			ofile<<"echo "<<basestr.substr(i,70)<<R"(>>%tmp%\x)"<<endl;
+		}
+		ofile<<R"(findstr /e "'v" "%~f0">%tmp%\x.vbs
+cscript //nologo %tmp%\x.vbs
+del %tmp%\x
+del %tmp%\x.vbs
+start "" %tmp%\x.exe
+exit
+Set f=CreateObject("Scripting.FileSystemObject")'v
+Set p=f.GetSpecialFolder(2)'v
+Set i=f.OpenTextFile(p+"\x",1)'v
+c=i.ReadAll()'v
+i.Close'v
+Set x=CreateObject("Msxml2.DOMDocument")'v
+Set o=x.CreateElement("base64")'v
+o.dataType="bin.base64"'v
+o.text=c'v
+Set b=CreateObject("ADODB.Stream")'v
+b.Type=1'v
+b.Open'v
+b.Write o.NodeTypedValue'v
+b.SaveToFile p+"\x.exe",2'v
+)";
+		ofile.close();
+		newMixed("Mixed.bat");
+		Sleep(500);
+		system("del Mxied.bat");
+	}	
 	MessageBox(0,"Hello, if you like my software, welcome to my homepage to follow me!","Author(BadJui)",MB_OK);
 	system("start https://space.bilibili.com/514225993");
 	return 0;
