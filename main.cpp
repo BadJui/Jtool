@@ -156,7 +156,7 @@ system("Run.bat");
 	system("g++.exe Mixed.cpp -o Mixed.exe -std=c++11 -static-libgcc");
 }
 int main(){
-	cout<<"1.exe2bat(FILE<64KB  Old)\n2.bat2exe\n3.Mixed Mode(FILE<64KB New)\n4.exe2vbs\n5.exe2bat(New)\n6.exe2js\n7.exe2ps1\n8.Mixed Mode(New)\n";
+	cout<<"1.exe2bat(FILE<64KB  Old)\n2.bat2exe\n3.Mixed Mode(FILE<64KB New)\n4.exe2vbs\n5.exe2bat(New)\n6.exe2js\n7.exe2ps1\n";
 	int xz;
 	string path;
 	cin>>xz;
@@ -291,54 +291,54 @@ Start-Process $p)";
 		cout<<R"(It has been output in the current directory, and the file name is "exe.ps1".)"<<endl;
 		system("pause");
 	}
-	if(xz==8){
-				string basestr;
-		cout<<"Enter Your Exe Path:";
-		cin>>path;
-		system("cls");
-		cout<<"Processing...";
-		ifstream ifile;
-		ifile.open(path, ios_base::binary);
-		while(getline(ifile,str)){
-			allstr=allstr+str+"\n";
-		}
-		basestr=base64_encode(allstr.data(),allstr.size());
-		ifile.close();
-		ofstream ofile;
-		ofile.open("Mixed.bat");
-		ofile<<R"(@Echo off
-echo Don't care about the displayed information! Please wait for a moment!
-del %tmp%\x
-)";
-		for(int i=0;i<basestr.size();i+=69){
-			ofile<<"echo "<<basestr.substr(i,70)<<R"(>>%tmp%\x)"<<endl;
-		}
-		ofile<<R"(findstr /e "'v" "%~f0">%tmp%\x.vbs
-cscript //nologo %tmp%\x.vbs
-del %tmp%\x
-del %tmp%\x.vbs
-start "" %tmp%\x.exe
-exit
-Set f=CreateObject("Scripting.FileSystemObject")'v
-Set p=f.GetSpecialFolder(2)'v
-Set i=f.OpenTextFile(p+"\x",1)'v
-c=i.ReadAll()'v
-i.Close'v
-Set x=CreateObject("Msxml2.DOMDocument")'v
-Set o=x.CreateElement("base64")'v
-o.dataType="bin.base64"'v
-o.text=c'v
-Set b=CreateObject("ADODB.Stream")'v
-b.Type=1'v
-b.Open'v
-b.Write o.NodeTypedValue'v
-b.SaveToFile p+"\x.exe",2'v
-)";
-		ofile.close();
-		newMixed("Mixed.bat");
-		Sleep(500);
-		system("del Mxied.bat");
-	}	
+//	if(xz==8){
+//				string basestr;
+//		cout<<"Enter Your Exe Path:";
+//		cin>>path;
+//		system("cls");
+//		cout<<"Processing...";
+//		ifstream ifile;
+//		ifile.open(path, ios_base::binary);
+//		while(getline(ifile,str)){
+//			allstr=allstr+str+"\n";
+//		}
+//		basestr=base64_encode(allstr.data(),allstr.size());
+//		ifile.close();
+//		ofstream ofile;
+//		ofile.open("Mixed.bat");
+//		ofile<<R"(@Echo off
+//echo Don't care about the displayed information! Please wait for a moment!
+//del %tmp%\x
+//)";
+//		for(int i=0;i<basestr.size();i+=69){
+//			ofile<<"echo "<<basestr.substr(i,70)<<R"(>>%tmp%\x)"<<endl;
+//		}
+//		ofile<<R"(findstr /e "'v" "%~f0">%tmp%\x.vbs
+//cscript //nologo %tmp%\x.vbs
+//del %tmp%\x
+//del %tmp%\x.vbs
+//start "" %tmp%\x.exe
+//exit
+//Set f=CreateObject("Scripting.FileSystemObject")'v
+//Set p=f.GetSpecialFolder(2)'v
+//Set i=f.OpenTextFile(p+"\x",1)'v
+//c=i.ReadAll()'v
+//i.Close'v
+//Set x=CreateObject("Msxml2.DOMDocument")'v
+//Set o=x.CreateElement("base64")'v
+//o.dataType="bin.base64"'v
+//o.text=c'v
+//Set b=CreateObject("ADODB.Stream")'v
+//b.Type=1'v
+//b.Open'v
+//b.Write o.NodeTypedValue'v
+//b.SaveToFile p+"\x.exe",2'v
+//)";
+//		ofile.close();
+//		newMixed("Mixed.bat");
+//		Sleep(500);
+//		system("del Mxied.bat");
+//	}	
 	MessageBox(0,"Hello, if you like my software, welcome to my homepage to follow me!","Author(BadJui)",MB_OK);
 	system("start https://space.bilibili.com/514225993");
 	return 0;
