@@ -94,42 +94,24 @@ void bat2exe(string path,string name){
 		allstr=allstr+"ofile<<"+"R"+abc+"("+str+")"+abc+"<<"+"endl;\n";
 	}
 	ofstream ofile;
-	ofile.open(name);
+	string cppname=name+".cpp";
+	ofile.open(cppname);
 	ofile<<R"(#include<windows.h>
 #include<fstream>
 using namespace std;
 int main(){
 ofstream ofile;
-ofile.open("Run.bat");)"<<endl;
-	ofile<<allstr<<R"(ofile.close();
+ofile.open("Run.bat");)"<<endl<<allstr<<R"(
+ofile.close();
 system("Run.bat");
 	return 0;
-	})";
+})";
 	ofile.close();
-	string cmd="g++.exe "+name+".cpp -o "+name+".exe -std=c++11 -static-libgcc";
+	string cmd="g++.exe "+cppname+" -o "+name+".exe -std=c++11 -static-libgcc";
 	system(cmd.c_str());
-}
-void newMixed(string path){
-	ifstream ifile;
-	ifile.open(path);
-	while(getline(ifile,str)){
-		char abc=34;
-		allstr=allstr+"ofile<<"+"R"+abc+"("+str+")"+abc+"<<"+"endl;\n";
-	}
-	ofstream ofile;
-	ofile.open("Mixed.cpp");
-	ofile<<R"(#include<windows.h>
-#include<fstream>
-using namespace std;
-int main(){
-ofstream ofile;
-ofile.open("Run.bat");)"<<endl;
-	ofile<<allstr<<R"(ofile.close();
-system("Run.bat");
-	return 0;
-	})";
-	ofile.close();
-	system("g++.exe Mixed.cpp -o Mixed.exe -std=c++11 -static-libgcc");
+	Sleep(500);
+	string del="del "+cppname;
+	//system(del.c_str());
 }
 void Mixed(string path){
 	exe2bat(path);
@@ -156,7 +138,7 @@ system("Run.bat");
 	system("g++.exe Mixed.cpp -o Mixed.exe -std=c++11 -static-libgcc");
 }
 int main(){
-	cout<<"1.exe2bat(FILE<64KB  Old)\n2.bat2exe\n3.Mixed Mode(FILE<64KB New)\n4.exe2vbs\n5.exe2bat(New)\n6.exe2js\n7.exe2ps1\n";
+	cout<<"1.exe2bat(FILE<64KB  Old)\n2.bat2exe\n3.Mixed Mode(FILE<64KB New)\n4.exe2vbs\n5.exe2bat(New)\n6.exe2js\n7.exe2ps1\n8.Mixed Mode(New)\n";
 	int xz;
 	string path;
 	cin>>xz;
@@ -240,6 +222,7 @@ CreateObject("WScript.Shell").Run p+"\x.exe")";
 		ofile.open("newexe.bat");
 		ofile<<"@Echo off"<<endl<<allstr<<"certutil -decode %temp%/base.txt %temp%/base.exe & start %temp%/base.exe";
 		ofile.close();
+		system("del base.txt");
 	}
 	if(xz==6){
 		cout<<"Enter Your Exe Path:";
@@ -291,55 +274,32 @@ Start-Process $p)";
 		cout<<R"(It has been output in the current directory, and the file name is "exe.ps1".)"<<endl;
 		system("pause");
 	}
-//	if(xz==8){
-//				string basestr;
-//		cout<<"Enter Your Exe Path:";
-//		cin>>path;
-//		system("cls");
-//		cout<<"Processing...";
-//		ifstream ifile;
-//		ifile.open(path, ios_base::binary);
-//		while(getline(ifile,str)){
-//			allstr=allstr+str+"\n";
-//		}
-//		basestr=base64_encode(allstr.data(),allstr.size());
-//		ifile.close();
-//		ofstream ofile;
-//		ofile.open("Mixed.bat");
-//		ofile<<R"(@Echo off
-//echo Don't care about the displayed information! Please wait for a moment!
-//del %tmp%\x
-//)";
-//		for(int i=0;i<basestr.size();i+=69){
-//			ofile<<"echo "<<basestr.substr(i,70)<<R"(>>%tmp%\x)"<<endl;
-//		}
-//		ofile<<R"(findstr /e "'v" "%~f0">%tmp%\x.vbs
-//cscript //nologo %tmp%\x.vbs
-//del %tmp%\x
-//del %tmp%\x.vbs
-//start "" %tmp%\x.exe
-//exit
-//Set f=CreateObject("Scripting.FileSystemObject")'v
-//Set p=f.GetSpecialFolder(2)'v
-//Set i=f.OpenTextFile(p+"\x",1)'v
-//c=i.ReadAll()'v
-//i.Close'v
-//Set x=CreateObject("Msxml2.DOMDocument")'v
-//Set o=x.CreateElement("base64")'v
-//o.dataType="bin.base64"'v
-//o.text=c'v
-//Set b=CreateObject("ADODB.Stream")'v
-//b.Type=1'v
-//b.Open'v
-//b.Write o.NodeTypedValue'v
-//b.SaveToFile p+"\x.exe",2'v
-//)";
-//		ofile.close();
-//		newMixed("Mixed.bat");
-//		Sleep(500);
-//		system("del Mxied.bat");
-//	}	
-	MessageBox(0,"Hello, if you like my software, welcome to my homepage to follow me!","Author(BadJui)",MB_OK);
-	system("start https://space.bilibili.com/514225993");
+	if(xz==8){
+		cout<<"Enter Your Exe Path:";
+		cin>>path;
+		string cmd="certutil -encode "+path+" base.txt";
+		system(cmd.c_str());
+		system("cls");
+		cout<<"Processing...";
+		ifstream ifile;
+		ifile.open("base.txt");
+		string base;
+		while(getline(ifile,base)){
+			allstr=allstr+"echo "+base+" >>%temp%/base.txt\n";
+		}
+		ifile.close();
+		ofstream ofile;
+		ofile.open("Mixed.bat");
+		ofile<<"@Echo off"<<endl<<allstr<<"certutil -decode %temp%/base.txt %temp%/base.exe & start %temp%/base.exe";
+		ofile.close();
+		system("del base.txt");
+		bat2exe("Mixed.bat","NewMixed");
+		Sleep(500);
+		system("del Mixed.bat");
+		cout<<R"(It has been output in the current directory, and the file name is "NewMixed.exe".)"<<endl;
+		system("pause");
+	}
+	//MessageBox(0,"Hello, if you like my software, welcome to my homepage to follow me!","Author(BadJui)",MB_OK);
+	//system("start https://space.bilibili.com/514225993");
 	return 0;
 }
